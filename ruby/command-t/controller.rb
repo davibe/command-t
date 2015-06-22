@@ -257,13 +257,23 @@ module CommandT
     def list_matches(options = {})
       return unless @needs_update || options[:force]
 
-      @matches = @active_finder.sorted_matches_for(
-        @prompt.abbrev,
-        :case_sensitive => case_sensitive?,
-        :limit          => match_limit,
-        :threads        => CommandT::Util.processor_count
-      )
-      @match_window.matches = @matches
+      if @prompt.abbrev.length != 0
+        @matches = @active_finder.sorted_matches_for(
+          @prompt.abbrev,
+          :case_sensitive => case_sensitive?,
+          :limit          => match_limit,
+          :threads        => CommandT::Util.processor_count
+        )
+        @match_window.matches = @matches
+      else
+        @matches = mru_finder.sorted_matches_for(
+          @prompt.abbrev,
+          :case_sensitive => case_sensitive?,
+          :limit          => match_limit,
+          :threads        => CommandT::Util.processor_count
+        )
+        @match_window.matches = @matches.reverse # most recent at top
+      end
 
       @needs_update = false
     end
